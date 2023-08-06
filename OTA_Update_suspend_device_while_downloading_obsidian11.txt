@@ -1,0 +1,204 @@
+Robot file testcase                           platformname = obsidian-11                                                                                                      
+Flash old build {argument}                    if platformname = obsidian :                                                                                       
+connect device log                               builder = "slave-builder-product-{platformname} -userdebug                                                                                                                    
+ota proxy enable                              flashresource_dir = pathlib.path().absolute()/testresource/flashresources                                                                                          
+ota install certificate
+set platform v1
+connect device log
+install latest otaservice v2 apk
+sleep 5
+suspend device
+if proxy.enable==1
+  validate device would start to download
+else
+  validate device would start dowload
+background download finished qbert11
+sleep 30
+resume device
+check ota update {taget.ota} readt-to-ota 
+wait for device reboot
+sleep 30
+check for ota updates {target.ota}
+{result} = grep build version aftyer ota
+should be equal {target.ota} {result}
+
+
+1.0 Flash old build {argument}
+  1.1 log to console enter old build ---> log to console prints the message (enter old build)
+  1.2 check out the new build {argument} 
+       def check out the new build(arguments) ---> argument passed here by robot file
+       version = check_output(adb -s {serialnumber} shell getprop | grep ro.build.id ,shell =True ).decode.replace("[ro.build.id:]","").replace("\n","").replace("[","").replace("]","")
+       print(version)
+       BuiltIn.log_to_console(the version is {version}) ---> prints the message to terminal
+       if argument = "":
+         server = jenkins.Jenkins("https://builder.pelotime.com,username =password=)
+         data_list = server.get_job_info(builder) ---->gives all job info in list
+         base_url = data_list[lastsuccessfulbuild]['url]
+         build_num = data_list[lastsuccesfulbuild][number]
+         build = server.get_build_info(builder,build_num) ----> gives build details as list
+         if build[discription]:
+            print(not a stable build)
+         else:
+          if build[artifacts]:
+            for x in range(0,4)
+               filename = build[artifact][x][filename]
+               if flashing_ in filename:
+               break
+         else:
+          print (this build is not stable)
+          imageurl = image_url + "artifact/"+filename
+       else:
+         imageurl = imageurl
+         filename = imageurl.split('/')[-1]
+         filepath = filename.replace(.zip,"")
+  1.3 download factory build and unzip
+       def download factory build and unzip()
+       if devicename == obsidian:
+         call(mkdir flashresource_dir/obsidain ,shell = true) ----> creats a folder
+             download_dir = flashresource_dir/obsidian
+        if os.path.isfile(download_dir/filename): ----> check the file is present or not
+          print(file exists)
+          file_size = os.path.getsize(download_dir/filename)
+          if size < 0.7:
+            print(download again)
+            call (rm  {dowload_dirc/filename , shell = true}) ----> removes the folder\
+            check_output(curl -u jenkinsaccount:jenkinsbuildtoken imageurl --ouput filname,shell = true) ---> download the build from server
+            with zipfile.Zipfile(download_dir/filname,r) as zip_ref
+            zip_ref.extractall(download_dir/imagepath)
+       else:
+          call(rm -rf download_dir/*,true)    
+           check_output(curl -u jenkinsaccount:jenkinsbuildtoken imageurl --ouput download_dir/filname,shell = true) ---> download the build from server
+           with zipfile.Zipfile(download_dir/filname,r) as zip_ref 
+           zip_ref.extractall(download_dir/imagepath) --> extracts zipfile
+           print(file downloaded)
+  1.4 set bootloader unlock state for qbert osidian
+       def set bootloader unlock state for qbert osidian()
+       deviceinfo=none
+       android_version = check_output(adb -s {serialnumber} shell getprop ro.build.version.release,shell  = true).decode
+       print(andropid_version)
+       command = check_output(adb -s {serialnumber} reboot bootloader, shell true).decode
+       print(command)
+       command =  check_output(adb -s {serialnumber} fastboot devices,shell = true).decode
+       print(command)
+       if "fastboot" not in commad:
+          command = check_output(adb -s {serialnumber} reboot bootloader, shell true).decode
+          print(command)
+          command =  check_output(adb -s {serialnumber} fastboot devices,shell = true).decode
+          print(command)
+         if "fastboot" not in commad:
+          command = check_output(adb -s {serialnumber} reboot bootloader, shell true).decode
+          print(command)
+          command =  check_output(adb -s {serialnumber} fastboot devices,shell = true).decode
+          print(command)
+         else:
+          print(no fastboot)
+                           
+       if "11" in android_version:
+       deviceinfo = subprocess.getoutput(fastboot oem device-info).replace("\n","")
+       print(device)
+       if (bootloader) unlock" not in deviceinfo:
+         print(device in not unlock)
+       
+       if "7" in androidversion:
+         lockstate = check_output(fastboot oem unlock).decode
+           din
+     
+         builtin.log_to_console(unlocked)
+
+  1.5 flash qbert and obsidian build
+          def flash qbert and obsidian build
+          if device == obsidian
+          foldername = flashresource/obsidian/imagepath
+          check_output(fastboot {serialnumber} fash preloader {foldername}/preloader_obsidian.bin,shell = true)
+          commom_dir = flashresource/common
+          ckeckout_put() 
+          check_output(fastboot reboot,shell =true)
+          def wait for device reboot
+           sleep()
+           timeout = 300
+           tstart = time.time()
+           while tme.time() -tstart <timeout :
+             command = ckoutput(adb devices).decode
+             if serialnumber in command 
+               try
+                 automator = u2.connect(serialnumber)
+                 automator.healthcheck()
+               exception:
+                 comand = ckoutput(pythom3 uiautomator2 init -s {serialnumber},shell = true).decode()
+                   print(command) 
+
+  1.6 setup qbert obsidian oobe
+       def setup qbert obsidian oobe()
+       .run_robot_keywords(obbe initial setup) ---> robot_keywords = builtin.keyword("string")
+         def obbe initial setup
+         switch_to_qa = false
+         if device == obsidian:
+           timeout = 1800
+         start_t=time.time()
+         t_current = t_start
+         while(time.time() - t_current < time_out):
+           if setting.element exits or not by text(enter yout network password,2)
+               def element exits or not by text(element,time)
+              if automator.(resourceid = element).exists(time):
+                return true
+              else:
+                 return false
+           settings.run robot keywords(obbe connect wifi)
+             def obbe connect wifi
+             if 5g is not none:
+               setting .click_element(text,wifi password)
+                 def click_element(uilocator,element,time)
+                 if uilocator = text
+                   if element exits or not by text(element,time)
+                     automator.(resourceid = element).click
+                 if uilocator = id
+                   if element exits or not by text(element,time)
+                     automator.(resourceid = element).click
+             setting.send adb shell command(input text {5gpassword}
+             setting.cliclelement(text,connect to wifi)
+            else:
+              setting. clicl element (text, connect to wifi network)
+            sleep
+            wifi.setting.check network connect state(5g ssid)
+             def check network connect(ssid,status = false)
+             setting.press home button()
+               def press home button(times,interval)
+               for _ in range(times)
+               send adb keyevent(interval)
+                 def aend adb keyevent(time=2,input)
+                 _ =  _db -s {serial number} shell input keyevent {input}
+              settings.send adb shell command(am start -n com.android.settings/.wifi.wifistatusTest)
+              setting.click element(id,com.android,settings:id/update)
+              connect ssid = setting get element text(id ,com.android,settings:id/ssid).replace('"','')
+                                def get element text(uilocator,element,time)
+              settings.presshome
+           send adb command(root)
+           send adb shell commad(svx bluetooth disable)
+           send adb command (unroot)
+           if device = ! topaz and switch to qa is false:
+             run robot keyword(switch to qa)
+              def switch to qa
+              send adb command(push flashresource_dir/AQ1/peloton-apikey-qa1.txt/sdcard/)
+              send adb shell command(mv /sdcard/peloton-apikey-qa1.txt/sdcard/peloton-apikey.txt)
+              send adb command(reboot)
+              wait for device reboot
+              switch to qa = true
+ 
+                                
+          
+              
+
+             
+
+
+                 
+                 
+    
+             
+                 
+         
+          
+     
+          
+ 
+                 
